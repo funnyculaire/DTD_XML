@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/bk/Desktop/C/Projet/DTD_XML/Clion/main.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+
