@@ -56,7 +56,7 @@ void openFile(char* filePath, char* dtdPath){
     printf("\n");
 }
 
-char** checkDtd(char* dtdPath, char **str){
+int checkDtd(char* dtdPath, char **dtdResult){
     FILE* dtd = fopen(dtdPath, "r");
 
     if(dtd == NULL){
@@ -68,41 +68,40 @@ char** checkDtd(char* dtdPath, char **str){
     int cmp, i, value, count;
     char c;
 
-    getElement(0, str, dtd, 32);
+    getElement(0, dtdResult, dtd, 32);
 
-    cmp = strcmp("<!DOCTYPE", &str[0][0]);
+    cmp = strcmp("<!DOCTYPE", &dtdResult[0][0]);
 
     if(cmp != 0){
         printf("Your dtd is in a wrong format.\n");
         return 0;
     }
 
-    getElement(1, str, dtd, 32);
+    getElement(1, dtdResult, dtd, 32);
 
-    printf("1st : %s\n", &str[1][0]);
+    printf("1st : %s\n", &dtdResult[1][0]);
 
     i = 2;
-    while(c != 93) {
+    while(c != EOF) {
         count = 0;
-//printf("#%c", c);
+        printf("#%c", c);
+
         while (c != 60 && c != 93) {
             if(c == 40 && i != 2) {
-                getTag(i, str, dtd, 41);
+                getTag(i, dtdResult, dtd, 41);
                 c = 41;
-                printf("Enfant : %s\n", &str[i][0]);
+                //printf("Enfant : %s\n", &str[i][0]);
                 i += 1;
             }
-
             c = fgetc(dtd);
 
             if(c == 62) {
                 count += 1;
             }
-
-
         }
 
-        if(c == 93) {
+        if(c == EOF) {
+            printf("HELLÀO WORLDS");
             return 0;
         }
 
@@ -112,13 +111,16 @@ char** checkDtd(char* dtdPath, char **str){
             value = 0;
         }
 
-        if (value != 1) {
+        if (value != 1 && value != 2) {
             printf("Your dtd is in a wrong format.\n");
             return 0;
+        } else if(value == 2) {
+            printf("Analyse fini");
+            return 1;
         }
 
-        getElement(i, str, dtd, 32);
-        printf("Balise : %s\n", &str[i][0]);
+        getElement(i, dtdResult, dtd, 32);
+        //printf("Balise : %s\n", &str[i][0]);
 
         if(c != 93 && c != 40) {
             //printf("?");
@@ -128,7 +130,12 @@ char** checkDtd(char* dtdPath, char **str){
         i += 1;
     }
 
-    return str;
+    for (i = 0; i < 50; i++){
+        printf("test : %s\n", &dtdResult[i][0]);
+    }
+
+    //return dtdResult;
+    return 1;
 }
 
 int checkElement(FILE *dtd) {
@@ -136,24 +143,26 @@ int checkElement(FILE *dtd) {
     char **str;
     int cmp, i;
 
-    str = (char**) malloc(sizeof(char **) * 8);
+    str = (char**) malloc(sizeof(char *) * 1);
 
-    for(i = 0; i < 8 ; i++){
-        str[i] = (char **) malloc(sizeof(char *) * 50);
-    }
+    //for(i = 0; i < 1 ; i++){
+    str[0] = (char *) malloc(sizeof(char) * 50);
+    //}
 
-    while(c != 32 ){
+    while(c != EOF && c != 32){
         strncat(&str[0][0], &c, 1);
         c = fgetc(dtd);
+        printf("%c", c);
     }
 
     cmp = strcmp("!ELEMENT", &str[0][0]);
     //printf("<> : %s\n", &str[0][0]);
 
-    for(i = 0; i < 8 ; i++){
-        free(str[i]);
-    }
     free(str);
+
+    if (c == EOF) {
+        return 2;
+    }
 
     if(cmp == 0) {
         return 1;
@@ -162,21 +171,21 @@ int checkElement(FILE *dtd) {
     return 0;
 }
 
-void getElement(int i, char **str, FILE *dtd, int value) {
+void getElement(int i, char **dtdResult, FILE *dtd, int value) {
     char c;
 
     c = fgetc(dtd);
     while(c != value ){
-        strncat(&str[i][0], &c, 1);
+        strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
     }
 }
 
-void getTag(int i, char **str, FILE *dtd, int value) {
+void getTag(int i, char **dtdResult, FILE *dtd, int value) {
     char c;
     int count = 0;
     c = 92;
-    strncat(&str[i][0], &c, 1);
+    strncat(&dtdResult[i][0], &c, 1);
 
     c = fgetc(dtd);
 
@@ -184,7 +193,7 @@ void getTag(int i, char **str, FILE *dtd, int value) {
         if(c == 40){
             count += 1;
         }
-        strncat(&str[i][0], &c, 1);
+        strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
     }
 
@@ -192,7 +201,7 @@ void getTag(int i, char **str, FILE *dtd, int value) {
         if(c == 41){
             count -= 1;
         }
-        strncat(&str[i][0], &c, 1);
+        strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
     }
 }

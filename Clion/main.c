@@ -12,21 +12,21 @@
 
 void openFile(char* filePath, char* dtdPath);
 char* getPath(int val);
-char** checkDtd(char* dtdPath, char** str);
-void getElement(int i, char** str, FILE* dtd, int value );
+int checkDtd(char* dtdPath, char** dtdResult);
+void getElement(int i, char** dtdResult, FILE* dtd, int value );
 int checkElement(FILE* dtd);
-void getTag(int i, char **str, FILE *dtd, int value);
+void getTag(int i, char **dtdResult, FILE *dtd, int value);
 
 int main(int argc, const char * argv[]) {
-    int value, i;
+    int value, i, result;
     int restart = 1;
-    char **dtdResult;
+    char ** dtdResult;
     int size = 50;
 
-    dtdResult = (char**) malloc(sizeof(char **) * size);
+    dtdResult = (char**) malloc(sizeof(char *) * size);
 
     for(i = 0; i < size ; i++){
-        dtdResult[i] = (char **) malloc(sizeof(char *) * size);
+        dtdResult[i] = (char *) malloc(sizeof(char) * size);
     }
 
     printf("Do you want to start? enter 1 for yes.\n");
@@ -40,12 +40,13 @@ int main(int argc, const char * argv[]) {
         //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtdErreur2.dtd"
         //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtd3.dtd"
         //openFile(file, dtd);
-
-        dtdResult = checkDtd(dtd, dtdResult);
+        if(checkDtd(dtd, dtdResult) == 0) {
+            return 0;
+        }
 
         //printf("Array : \n");
         /*for(i = 0; i < size ; i++){
-            printf("%s", &dtdResult[i][0]);
+            printf("M : %s\n", &dtdResult[i][0]);
         }*/
 
         printf("Do you want to relaunch the program? enter 1 for yes.\n");
