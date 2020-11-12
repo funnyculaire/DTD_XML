@@ -1,4 +1,16 @@
+void getElement(int i, char **str, FILE *dtd, int value);
 
+int checkElement(FILE *dtd);
+
+void getTag(int i, char **str, FILE *dtd, int value);
+
+/*struct Element {
+    char* name;
+    char[] children;
+
+};
+typedef struct Element Element;
+*/
 char* getPath(int val){
     int size = 500;
     int *pSize = &size;
@@ -44,7 +56,7 @@ void openFile(char* filePath, char* dtdPath){
     printf("\n");
 }
 
-int checkDtd(char* dtdPath){
+char** checkDtd(char* dtdPath, char **str){
     FILE* dtd = fopen(dtdPath, "r");
 
     if(dtd == NULL){
@@ -52,48 +64,135 @@ int checkDtd(char* dtdPath){
         return 0;
     }
 
-    char *type = "<!DOCTYPE \0";
-    char *element = "<!ELEMENT \0";
-    char *endType = " [\n\0";
-    char *end = ">\n\0";
-    char *tab = "\t";
-    char *str[11];
-    char *str2[50];
-    char *str3[2];
-    int cmp, i;
-    int j = 0;
+    //char **str;
+    int cmp, i, value, count;
     char c;
-    fgets(str, 11, dtd);
-    str[10] = "\0";
 
-    cmp = strcmp(type, str);
+    getElement(0, str, dtd, 32);
+
+    cmp = strcmp("<!DOCTYPE", &str[0][0]);
 
     if(cmp != 0){
         printf("Your dtd is in a wrong format.\n");
         return 0;
     }
 
-    cmp = 1;
-    str3[1] = "\0";
+    getElement(1, str, dtd, 32);
 
-    for(i = 0; cmp != 0; i++){
-        c = fgetc(dtd);
+    printf("1st : %s\n", &str[1][0]);
 
-        str3[0] = c;
+    i = 2;
+    while(c != 93) {
+        count = 0;
+//printf("#%c", c);
+        while (c != 60 && c != 93) {
+            if(c == 40 && i != 2) {
+                getTag(i, str, dtd, 41);
+                c = 41;
+                printf("Enfant : %s\n", &str[i][0]);
+                i += 1;
+            }
 
-        printf("%s", str3);
-        cmp = strcmp(str3, " \0");
-        if(cmp == 0) {
-            str2[i] = "\0";
-        } else {
-            str2[i] = c;
+            c = fgetc(dtd);
+
+            if(c == 62) {
+                count += 1;
+            }
+
+
         }
+
+        if(c == 93) {
+            return 0;
+        }
+
+        if(count == 1 || i == 2) {
+            value = checkElement(dtd);
+        } else {
+            value = 0;
+        }
+
+        if (value != 1) {
+            printf("Your dtd is in a wrong format.\n");
+            return 0;
+        }
+
+        getElement(i, str, dtd, 32);
+        printf("Balise : %s\n", &str[i][0]);
+
+        if(c != 93 && c != 40) {
+            //printf("?");
+            c = fgetc(dtd);
+        }
+
+        i += 1;
     }
 
-    //fread(str2, 1, 5, dtd);
-    printf("%s", str2);
+    return str;
+}
 
-    printf("Test.\n");
+int checkElement(FILE *dtd) {
+    char c;
+    char **str;
+    int cmp, i;
 
-    return 1;
+    str = (char**) malloc(sizeof(char **) * 8);
+
+    for(i = 0; i < 8 ; i++){
+        str[i] = (char **) malloc(sizeof(char *) * 50);
+    }
+
+    while(c != 32 ){
+        strncat(&str[0][0], &c, 1);
+        c = fgetc(dtd);
+    }
+
+    cmp = strcmp("!ELEMENT", &str[0][0]);
+    //printf("<> : %s\n", &str[0][0]);
+
+    for(i = 0; i < 8 ; i++){
+        free(str[i]);
+    }
+    free(str);
+
+    if(cmp == 0) {
+        return 1;
+    }
+
+    return 0;
+}
+
+void getElement(int i, char **str, FILE *dtd, int value) {
+    char c;
+
+    c = fgetc(dtd);
+    while(c != value ){
+        strncat(&str[i][0], &c, 1);
+        c = fgetc(dtd);
+    }
+}
+
+void getTag(int i, char **str, FILE *dtd, int value) {
+    char c;
+    int count = 0;
+    c = 92;
+    strncat(&str[i][0], &c, 1);
+
+    c = fgetc(dtd);
+
+    while(c != value ){
+        if(c == 40){
+            count += 1;
+        }
+        strncat(&str[i][0], &c, 1);
+        c = fgetc(dtd);
+    }
+
+    while(count > 0){
+        if(c == 41){
+            count -= 1;
+        }
+        strncat(&str[i][0], &c, 1);
+        c = fgetc(dtd);
+    }
 }
