@@ -24,9 +24,9 @@ int main(int argc, const char * argv[]) {
         printf("Do you want to start? enter 1 for yes.\n");
         scanf("%d", &value);
         if(value == 1){
-            char *file = "C:/Local/102020_Projet/Files/xml1.xml"; //getPath(1);
+            char *file = "C:/Users/tnori/102020_Projet/files/xml1.xml"; //getPath(1);
             //"/Users/bk/Desktop/C/ProjetC/DTD_XML/files/xml1.xml";
-            char *dtd = "C:/Local/102020_Projet/Files/dtdGood1.dtd"; //getPath(0);
+            char *dtd = "C:/Users/tnori/102020_Projet/Files/dtdGood1.dtd"; //getPath(0);
             //"/Users/bk/Desktop/C/ProjetC/DTD_XML/files/dtdGood1.dtd";
             //"/Users/bk/Desktop/C/ProjetC/DTD_XML/files/dtdErreur2.dtd"
             openFile(file, dtd);
@@ -185,9 +185,11 @@ void checkXml(char* XMLPath){
                     }else{
                         printf("%c", letter2);
                         fputc(letter2, fichier);
+                        fseek(fichier, 0, SEEK_CUR);
                         again2 = 1;
                     }
                 }
+                printf("\n");
                 if(again2 == 1){
                     fputc('\n', fichier);
                 }
