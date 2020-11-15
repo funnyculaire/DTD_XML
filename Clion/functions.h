@@ -1,16 +1,10 @@
-void getElement(int i, char **str, FILE *dtd, int value);
+void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j);
 
 int checkElement(FILE *dtd);
 
 void getTag(int i, char **str, FILE *dtd, int value);
 
-/*struct Element {
-    char* name;
-    char[] children;
-
-};
-typedef struct Element Element;
-*/
+//Get file path to open them
 char* getPath(int val){
     int size = 500;
     int *pSize = &size;
@@ -33,6 +27,7 @@ char* getPath(int val){
     return str;
 }
 
+// Function to open the files & read them
 void openFile(char* filePath, char* dtdPath){
     FILE* f = fopen(filePath, "r");
     FILE* dtd = fopen(dtdPath, "r");
@@ -56,7 +51,9 @@ void openFile(char* filePath, char* dtdPath){
     printf("\n");
 }
 
-int checkDtd(char* dtdPath, char **dtdResult){
+
+// Function to check dtd format & get the different element in it
+int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
     FILE* dtd = fopen(dtdPath, "r");
 
     if(dtd == NULL){
@@ -64,11 +61,11 @@ int checkDtd(char* dtdPath, char **dtdResult){
         return 0;
     }
 
-    //char **str;
     int cmp, i, value, count;
     char c;
+    int j = 0;
 
-    getElement(0, dtdResult, dtd, 32);
+    getElement(0, dtdResult, dtd, elementIndex, j);
 
     cmp = strcmp("<!DOCTYPE", &dtdResult[0][0]);
 
@@ -77,34 +74,35 @@ int checkDtd(char* dtdPath, char **dtdResult){
         return 0;
     }
 
-    getElement(1, dtdResult, dtd, 32);
+    getElement(1, dtdResult, dtd, elementIndex, j);
 
-    printf("1st : %s\n", &dtdResult[1][0]);
-
+    // Get the element after the doctype
     i = 2;
     while(c != EOF) {
         count = 0;
-        printf("#%c", c);
 
+        // read each characters until we find a "<" or a "]"
         while (c != 60 && c != 93) {
+
+            //if we get a "(" we will get the information in it
             if(c == 40 && i != 2) {
                 getTag(i, dtdResult, dtd, 41);
                 c = 41;
-                //printf("Enfant : %s\n", &str[i][0]);
                 i += 1;
             }
             c = fgetc(dtd);
 
+            //count help to find the end of a tag
             if(c == 62) {
                 count += 1;
             }
         }
 
         if(c == EOF) {
-            printf("HELLÀO WORLDS");
             return 0;
         }
 
+        // We check if the tag start with an "!ELEMENT" & if the tag is closed before opening another one
         if(count == 1 || i == 2) {
             value = checkElement(dtd);
         } else {
@@ -115,26 +113,22 @@ int checkDtd(char* dtdPath, char **dtdResult){
             printf("Your dtd is in a wrong format.\n");
             return 0;
         } else if(value == 2) {
-            printf("Analyse fini");
+            // the case where we got to the end of file
             return 1;
         }
 
-        getElement(i, dtdResult, dtd, 32);
-        //printf("Balise : %s\n", &str[i][0]);
+
+        // we store our element's name in our array
+        getElement(i, dtdResult, dtd, elementIndex, j);
+        j += 1;
 
         if(c != 93 && c != 40) {
-            //printf("?");
             c = fgetc(dtd);
         }
 
         i += 1;
     }
 
-    for (i = 0; i < 50; i++){
-        printf("test : %s\n", &dtdResult[i][0]);
-    }
-
-    //return dtdResult;
     return 1;
 }
 
@@ -145,19 +139,17 @@ int checkElement(FILE *dtd) {
 
     str = (char**) malloc(sizeof(char *) * 1);
 
-    //for(i = 0; i < 1 ; i++){
     str[0] = (char *) malloc(sizeof(char) * 50);
-    //}
 
     while(c != EOF && c != 32){
         strncat(&str[0][0], &c, 1);
         c = fgetc(dtd);
-        printf("%c", c);
+        //printf("%c", c);
     }
 
     cmp = strcmp("!ELEMENT", &str[0][0]);
-    //printf("<> : %s\n", &str[0][0]);
 
+    free(str[0]);
     free(str);
 
     if (c == EOF) {
@@ -171,11 +163,17 @@ int checkElement(FILE *dtd) {
     return 0;
 }
 
-void getElement(int i, char **dtdResult, FILE *dtd, int value) {
+void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j){
     char c;
 
+    // In the same time as we stock our element, we also stock its index in another array to retrieve them later
+    if(i > 1) {
+        elementIndex[j] = i;
+    }
+
     c = fgetc(dtd);
-    while(c != value ){
+
+    while(c != 32 ){
         strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
     }
@@ -184,11 +182,11 @@ void getElement(int i, char **dtdResult, FILE *dtd, int value) {
 void getTag(int i, char **dtdResult, FILE *dtd, int value) {
     char c;
     int count = 0;
-    c = 92;
-    strncat(&dtdResult[i][0], &c, 1);
+    //c = 92;
+    //strncat(&dtdResult[i][0], &c, 1);
 
     c = fgetc(dtd);
-
+// We stock what's in "()"
     while(c != value ){
         if(c == 40){
             count += 1;
@@ -197,6 +195,8 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value) {
         c = fgetc(dtd);
     }
 
+    // count helps to know how many "(" we have inside one and hence we will continue stocking
+    // characters until every "(" has its closed one
     while(count > 0){
         if(c == 41){
             count -= 1;
@@ -204,4 +204,35 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value) {
         strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
     }
+}
+
+
+int checkDoublons(char **dtdResult, int *elementIndex, int size) {
+    int i, j, k, count, cmp;
+    //We are checking if any element is stored several times
+    for(i = 0; i < size - 1; i++){
+        count = 0;
+
+        for(k = 0; k < size; k++){
+            if(i == elementIndex[k]){
+                count += 1;
+            }
+        }
+
+        if(count > 0) {
+            for (j = i + 1; j < size; j++) {
+                for(k = 0; k < size; k++){
+                    if(j == elementIndex[k] ){
+                        cmp = strcmp(dtdResult[i], dtdResult[j]);
+
+                        if(cmp == 0) {
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return 1;
 }
