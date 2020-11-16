@@ -1,0 +1,4 @@
+<!DOCTYPEESGI [
+    <!ELEMENT classrooms (classroom+)>
+    <!ELEMENT classroom (#PCDATA)>
+]>
