@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/Users/bk/Desktop/C/Projet/DTD_XML/Clion/functions.h
+/Users/kevincheng/Desktop/DTD_XML/DTD_XML/Clion/functions.h
 
-/Users/bk/Desktop/C/Projet/DTD_XML/Clion/main.c
+/Users/kevincheng/Desktop/DTD_XML/DTD_XML/Clion/main.c
 stdio.h
 -
 stdlib.h
@@ -16,5 +16,5 @@ stdlib.h
 string.h
 -
 functions.h
-/Users/bk/Desktop/C/Projet/DTD_XML/Clion/functions.h
+/Users/kevincheng/Desktop/DTD_XML/DTD_XML/Clion/functions.h
 

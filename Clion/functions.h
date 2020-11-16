@@ -1,5 +1,5 @@
 void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j);
-
+void createDataTable( char dtd[20][20]);
 int checkElement(FILE *dtd);
 
 void getTag(int i, char **str, FILE *dtd, int value);
@@ -23,7 +23,6 @@ char* getPath(int val){
             str[i] = "\0";
         }
     }
-
     return str;
 }
 
@@ -75,6 +74,9 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
     }
 
     getElement(1, dtdResult, dtd, elementIndex, j);
+    //printf("%s",dtdResult);
+
+
 
     // Get the element after the doctype
     i = 2;
@@ -127,6 +129,9 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
         }
 
         i += 1;
+
+
+
     }
 
     return 1;
@@ -172,12 +177,15 @@ void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j){
     }
 
     c = fgetc(dtd);
+    //printf("%c",c);
 
     while(c != 32 ){
         strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
+       // printf("%c",c);
     }
 }
+
 
 void getTag(int i, char **dtdResult, FILE *dtd, int value) {
     char c;
@@ -186,6 +194,8 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value) {
     //strncat(&dtdResult[i][0], &c, 1);
 
     c = fgetc(dtd);
+    printf("%c",c);
+
 // We stock what's in "()"
     while(c != value ){
         if(c == 40){
@@ -233,6 +243,115 @@ int checkDoublons(char **dtdResult, int *elementIndex, int size) {
             }
         }
     }
-
     return 1;
 }
+
+char* getBalise(int index, char **dtd_table){
+    int size = 20;
+
+    char *balise = (char*)malloc(sizeof(char)*size);
+    for(int i = 0; i<20; i++){
+        if(i == index){
+            for(int j = 0; j<20; j++){
+                balise[j] = dtd_table[i][j];
+                //printf("%c", balise[j]);
+            }
+        }
+    }
+    return balise;
+}
+
+void createDataTable(char dtd_table[20][20]) {
+
+    FILE* dtd_file = fopen("/Users/kevincheng/Desktop/dtd_file.txt", "r");
+
+    int i=0 , j=0;
+
+    int mychar;
+
+    //dtd_file = fopen("..\dtd_file.txt", "r");
+    if( dtd_file != NULL){//Si fichier non vide
+        do{
+            mychar = fgetc(dtd_file);
+            dtd_table[i][j] = mychar;//Save char in tab
+            j++;
+            if(mychar == 10){
+                i++;//On saute une ligne
+                j=0;//retour à la ligne pour le tableau
+            }
+            //printf("%c", mychar);
+        } while (mychar != EOF);
+        printf("\n");
+
+        fclose(dtd_file);
+    }
+}
+
+int getSize (char* table ){
+    int size = 0;
+    int i = 0;
+    while (table[i] != '\0'){
+        size++;
+        i++;
+    }
+    return size-1 ;
+}
+
+int compare(char dtd_table[20][20], char **dtd_result, int sizeDtdResult){
+
+    for(int mot = 0; mot <20; mot++) {
+        printf("%s", dtd_table[mot]);
+        for (int i = 1; i < sizeDtdResult; i++) {
+            char *balise = getBalise(i, dtd_result);
+            int sizeBalise = getSize(balise);
+            int sizemot = getSize(dtd_table[mot]);
+
+            if (sizeBalise != sizemot) {
+                printf("KO %d",i);
+                printf("%s\n",balise);
+                printf("%s \n",dtd_table[mot]);
+                printf("%d ||  %d", sizemot , sizeBalise);
+                return 0;
+            } else {
+                for (int p = 0; p < sizemot; p++) {
+                    if (p > 0) {
+                        if (balise[p] != dtd_table[mot][p]) {
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+        return 1;
+}
+
+void clearTable(char dtd_table[20][20]){
+    for(int i = 0; i<20; i++){
+        for(int j = 0; j<20; j++){
+            dtd_table[i][j] = '\0';
+        }
+    }
+}
+
+/*
+char** dtd_result = NULL;
+FILE *file = fopen("..\dtd_file.txt", "r");
+char dtd_table[20][20];
+
+//Iniatialisation des cases à 0;
+clearTable(dtd_table);
+
+int result = compare(file,dtd_result, dtd_table);
+
+for(int i = 0; i<20; i++){
+    for(int j = 0; j<20; j++){
+        printf("%c",dtd_table[i][j]);
+    }
+    printf("\n");
+} */
+
+// //Affichage des données
+//       for(int jk=0;jk<i;jk++){
+//           printf("%s",&dtdResult[jk][0]);
+//       }

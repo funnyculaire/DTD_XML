@@ -1,4 +1,6 @@
-//
+//TODO : Comparatison XML / DTD  ||
+
+
 //  main.c
 //  projetC
 //
@@ -17,6 +19,9 @@ void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j);
 int checkElement(FILE* dtd);
 void getTag(int i, char **dtdResult, FILE *dtd, int value);
 int checkDoublons(char **dtdResult, int* elementIndex, size);
+int compare( char  dtd_table[20][20], char ** dtd_resultat, int sizeDtdResult );
+void clearTable( char dtd_table[20][20]);
+void createDataTable( char dtd[20][20]);
 
 int main(int argc, const char * argv[]) {
     int value, i, result, doubleElement;
@@ -24,15 +29,21 @@ int main(int argc, const char * argv[]) {
     int size = 50;
     int *elementIndex;
     int tabError = 1;
-
-
+    int sizeTable =0 ;
 
     printf("Do you want to start? enter 1 for yes.\n");
     scanf("%d", &value);
 
-    while(value == 1){
+   while(value == 1){
+
+       char dtdtable[20][20];
+
+       clearTable(dtdtable);
+
+       createDataTable(dtdtable);
+
         dtdResult = (char**) malloc(sizeof(char *) * size);
-        elementIndex = malloc(sizeof(int) * size);
+        elementIndex = malloc(sizeof(int) * size); // pour check doublon
 
         for(i = 0; i < size ; i++){
             dtdResult[i] = (char *) malloc(sizeof(char) * size);
@@ -52,7 +63,15 @@ int main(int argc, const char * argv[]) {
             tabError = 0;
         }
 
+
         doubleElement = checkDoublons(dtdResult, elementIndex, size);
+
+       for(int ij=0; ij <20; ij++){
+           if (dtdResult[ij][0] != '\0'){
+               printf("%s \n",dtdResult[ij]);
+               sizeTable++;
+           }
+       }
 
         if(doubleElement == 0 || tabError == 1) {
             printf("Il y a une erreur dans votre dtd\n");
@@ -61,6 +80,12 @@ int main(int argc, const char * argv[]) {
         } else {
             printf("Continuité du code\n");
         }
+
+        int resultcompare = compare(dtdtable, dtdResult, sizeTable);
+
+
+
+        printf("Mon résultat :%d", resultcompare);
 
         for(i = 0; i < size ; i++){
             free(dtdResult[i]);
