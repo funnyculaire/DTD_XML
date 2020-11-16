@@ -209,6 +209,7 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value) {
 
 int checkDoublons(char **dtdResult, int *elementIndex, int size) {
     int i, j, k, count, cmp;
+    
     //We are checking if any element is stored several times
     for(i = 0; i < size - 1; i++){
         count = 0;
