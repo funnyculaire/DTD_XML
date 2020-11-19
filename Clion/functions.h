@@ -1,8 +1,7 @@
 void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j);
-
 int checkElement(FILE *dtd);
-
 void getTag(int i, char **str, FILE *dtd, int value);
+void getAttribute(FILE *dtd, char **dtdAttribute, int k);
 
 //Get file path to open them
 char* getPath(int val){
@@ -53,7 +52,7 @@ void openFile(char* filePath, char* dtdPath){
 
 
 // Function to check dtd format & get the different element in it
-int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
+int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttribute){
     FILE* dtd = fopen(dtdPath, "r");
 
     if(dtd == NULL){
@@ -64,7 +63,8 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
     int cmp, i, value, count;
     char c;
     int j = 0;
-
+    int k = 0;
+//
     getElement(0, dtdResult, dtd, elementIndex, j);
 
     cmp = strcmp("<!DOCTYPE", &dtdResult[0][0]);
@@ -79,7 +79,11 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
     // Get the element after the doctype
     i = 2;
     while(c != EOF) {
-        count = 0;
+        if(value == 3){
+            count = 1;
+        } else {
+            count = 0;
+        }
 
         // read each characters until we find a "<" or a "]"
         while (c != 60 && c != 93) {
@@ -109,18 +113,20 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
             value = 0;
         }
 
-        if (value != 1 && value != 2) {
+        if (value != 1 && value != 2 && value != 3) {
             printf("Your dtd is in a wrong format.\n");
             return 0;
         } else if(value == 2) {
             // the case where we got to the end of file
             return 1;
+        } else if(value == 1) {
+            // we store our element's name in our array
+            getElement(i, dtdResult, dtd, elementIndex, j);
+            j += 1;
+        } else if(value == 3) {
+            getAttribute(dtd, dtdAttribute, k);
+            k += 1;
         }
-
-
-        // we store our element's name in our array
-        getElement(i, dtdResult, dtd, elementIndex, j);
-        j += 1;
 
         if(c != 93 && c != 40) {
             c = fgetc(dtd);
@@ -149,15 +155,28 @@ int checkElement(FILE *dtd) {
 
     cmp = strcmp("!ELEMENT", &str[0][0]);
 
-    free(str[0]);
-    free(str);
 
     if (c == EOF) {
+        free(str[0]);
+        free(str);
+
         return 2;
     }
 
     if(cmp == 0) {
+        free(str[0]);
+        free(str);
+
         return 1;
+    }
+
+    cmp = strcmp("!ATTLIST", &str[0][0]);
+
+    if(cmp == 0) {
+        free(str[0]);
+        free(str);
+printf("Test");
+        return 3;
     }
 
     return 0;
@@ -209,7 +228,7 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value) {
 
 int checkDoublons(char **dtdResult, int *elementIndex, int size) {
     int i, j, k, count, cmp;
-    
+
     //We are checking if any element is stored several times
     for(i = 0; i < size - 1; i++){
         count = 0;
@@ -236,4 +255,38 @@ int checkDoublons(char **dtdResult, int *elementIndex, int size) {
     }
 
     return 1;
+}
+
+void getAttribute(FILE *dtd, char **dtdAttribute, int k) {
+    char c;
+
+    c = fgetc(dtd);
+
+    while(c != 62 ){
+        strncat(&dtdAttribute[k][0], &c, 1);
+        c = fgetc(dtd);
+    }
+
+    printf("\n%s\n", &dtdAttribute[k][0]);
+}
+
+int checkAttribute(char **dtdAttribute, int *attributeId, char **dtdResult, int* elementIndex) {
+    char c;
+    int i, j, cmp;
+    char **str;
+/*
+    str = (char**) malloc(sizeof(char *) * 1);
+
+    str[0] = (char *) malloc(sizeof(char) * 50);
+
+    while(c != 32){
+        strncat(&str[0][0], &c, 1);
+        c = fgetc(dtdAttribute);
+        //printf("%c", c);
+    }
+
+    cmp = strcmp("!ELEMENT", &str[0][0]);
+*/
+
+    return 0;
 }
