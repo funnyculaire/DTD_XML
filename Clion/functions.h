@@ -52,7 +52,7 @@ void openFile(char* filePath, char* dtdPath){
 
 
 // Function to check dtd format & get the different element in it
-int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttribute){
+int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttribute, int* attributeSize){
     FILE* dtd = fopen(dtdPath, "r");
 
     if(dtd == NULL){
@@ -64,7 +64,8 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttri
     char c;
     int j = 0;
     int k = 0;
-//
+    attributeSize = 0;
+
     getElement(0, dtdResult, dtd, elementIndex, j);
 
     cmp = strcmp("<!DOCTYPE", &dtdResult[0][0]);
@@ -118,6 +119,7 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttri
             return 0;
         } else if(value == 2) {
             // the case where we got to the end of file
+            strncat(&dtdAttribute[k][0], "-1", 2);
             return 1;
         } else if(value == 1) {
             // we store our element's name in our array
@@ -126,6 +128,7 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttri
         } else if(value == 3) {
             getAttribute(dtd, dtdAttribute, k);
             k += 1;
+            attributeSize = attributeSize + 1;
         }
 
         if(c != 93 && c != 40) {
@@ -141,7 +144,7 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttri
 int checkElement(FILE *dtd) {
     char c;
     char **str;
-    int cmp, i;
+    int cmp;
 
     str = (char**) malloc(sizeof(char *) * 1);
 
@@ -150,11 +153,9 @@ int checkElement(FILE *dtd) {
     while(c != EOF && c != 32){
         strncat(&str[0][0], &c, 1);
         c = fgetc(dtd);
-        //printf("%c", c);
     }
 
     cmp = strcmp("!ELEMENT", &str[0][0]);
-
 
     if (c == EOF) {
         free(str[0]);
@@ -175,7 +176,6 @@ int checkElement(FILE *dtd) {
     if(cmp == 0) {
         free(str[0]);
         free(str);
-printf("Test");
         return 3;
     }
 
@@ -201,8 +201,6 @@ void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j){
 void getTag(int i, char **dtdResult, FILE *dtd, int value) {
     char c;
     int count = 0;
-    //c = 92;
-    //strncat(&dtdResult[i][0], &c, 1);
 
     c = fgetc(dtd);
 // We stock what's in "()"
@@ -266,27 +264,51 @@ void getAttribute(FILE *dtd, char **dtdAttribute, int k) {
         strncat(&dtdAttribute[k][0], &c, 1);
         c = fgetc(dtd);
     }
-
-    printf("\n%s\n", &dtdAttribute[k][0]);
 }
 
-int checkAttribute(char **dtdAttribute, int *attributeId, char **dtdResult, int* elementIndex) {
-    char c;
-    int i, j, cmp;
-    char **str;
-/*
-    str = (char**) malloc(sizeof(char *) * 1);
+int checkAttribute(char **dtdAttribute, int* attributeSize, char **dtdResult, int* elementIndex, int* size) {
+    int i, j, k, l, count;
+    char searchData[6] = "CDATA";
+    char searchImplied[9] = "#IMPLIED";
+    char searchRequired[10] = "#REQUIRED";
+    char end[3] = "-1";
 
-    str[0] = (char *) malloc(sizeof(char) * 50);
+    for(i = 0, l = 1; i <= attributeSize && l != -1; i++){
+        count = 0;
 
-    while(c != 32){
-        strncat(&str[0][0], &c, 1);
-        c = fgetc(dtdAttribute);
-        //printf("%c", c);
+        if(strstr(&dtdAttribute[i][0], end) == NULL) {
+            for (j = 2; j < size; j++) {
+                for (k = 0; k < size; k++) {
+
+                    if (j == elementIndex[k]) {
+                        char *result = strstr(&dtdAttribute[i][0], &dtdResult[j][0]);
+
+                        if (result != NULL) {
+                            count += 1;
+                        }
+                    }
+                }
+            }
+
+            if (count == 0) {
+                return 1;
+            }
+
+            char *data = strstr(&dtdAttribute[i][0], searchData);
+            char *implied = strstr(&dtdAttribute[i][0], searchImplied);
+            char *required = strstr(&dtdAttribute[i][0], searchRequired);
+
+            if (data == NULL) {
+                return 1;
+            }
+
+            if (implied == NULL && required == NULL) {
+                return 1;
+            }
+        } else {
+            l = -1;
+        }
     }
-
-    cmp = strcmp("!ELEMENT", &str[0][0]);
-*/
 
     return 0;
 }
