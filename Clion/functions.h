@@ -4,17 +4,6 @@ void getTag(int i, char **str, FILE *dtd, int value);
 void getAttribute(FILE *dtd, char **dtdAttribute, int k);
 
 //Get file path to open them
-char* getPath(int val){
-    int size = 500;
-    int *pSize = &size;
-
-    if(val == 1){
-
-    } else if(val == 0){
-
-    }
-}
-
 void getFile(char *file) {
     printf("Enter the path to the xml\n");
     scanf("%s", file);
