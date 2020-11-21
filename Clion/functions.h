@@ -7,24 +7,40 @@ void getAttribute(FILE *dtd, char **dtdAttribute, int k);
 char* getPath(int val){
     int size = 500;
     int *pSize = &size;
-    char *str[*pSize];
-    if(val == 1){
-        printf("Enter the path to the xml\n");
-    } else if(val == 0){
-        printf("Enter the path to the dtd\n");
-    }
 
-    scanf("%s", &str);
+    if(val == 1){
+
+    } else if(val == 0){
+
+    }
+}
+
+void getFile(char *file) {
+    printf("Enter the path to the xml\n");
+    scanf("%s", file);
     printf("\n");
 
-    for(int i = 0; i < *pSize; i++){
-        if(str[i] == "\n"){
-            str[i] = "\0";
+    for(int i = 0; i < 500; i++){
+        if(file[i] == "\n"){
+            file[i] = "\0";
         }
     }
-
-    return str;
 }
+
+
+void getDtd(char *dtd) {
+    printf("Enter the path to the dtd\n");
+
+    scanf("%s", dtd);
+    printf("\n");
+
+    for(int i = 0; i < 500; i++){
+        if(dtd[i] == "\n"){
+            dtd[i] = "\0";
+        }
+    }
+}
+
 
 // Function to open the files & read them
 void openFile(char* filePath, char* dtdPath){

@@ -19,6 +19,8 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value);
 int checkDoublons(char **dtdResult, int* elementIndex, size);
 void getAttribute(FILE *dtd, char **dtdAttribute, int k);
 int checkAttribute(char **dtdAttribute, int *attributeSize, char **dtdResult, int* elementIndex, int* size);
+void getFile(char *file);
+void getDtd(char *dtd);
 
 int main(int argc, const char * argv[]) {
     int value, i, result, doubleElement, attError;
@@ -28,6 +30,8 @@ int main(int argc, const char * argv[]) {
     int *elementIndex;
     int *attributeSize;
     int tabError = 1;
+    char * file;
+    char * dtd;
 
     printf("Do you want to start? enter 1 for yes.\n");
     scanf("%d", &value);
@@ -36,6 +40,8 @@ int main(int argc, const char * argv[]) {
         dtdResult = (char**) malloc(sizeof(char *) * size);
         dtdAttribute = (char**) malloc(sizeof(char *) * size);
         elementIndex = malloc(sizeof(int) * size);
+        file = malloc(sizeof(char) * 500);
+        dtd = malloc(sizeof(char) * 500);
 
         for(i = 0; i < size ; i++){
             dtdResult[i] = (char *) malloc(sizeof(char) * size);
@@ -43,8 +49,8 @@ int main(int argc, const char * argv[]) {
             elementIndex[i] = 2;
         }
 
-        char *file = getPath(1);
-        char *dtd = getPath(0);
+        getFile(file);
+        getDtd(dtd);
 
         //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtd3.dtd"
         //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtd4.dtd"
@@ -57,6 +63,8 @@ int main(int argc, const char * argv[]) {
 
         doubleElement = checkDoublons(dtdResult, elementIndex, size);
         attError = checkAttribute(dtdAttribute, attributeSize, dtdResult, elementIndex, size);
+printf("file: %s\n", file);
+        printf("dtd: %s\n", dtd);
 
         if(doubleElement == 0 || tabError == 1 || attError == 1) {
             printf("Il y a une erreur dans votre dtd\n");
@@ -80,5 +88,7 @@ int main(int argc, const char * argv[]) {
 
     return EXIT_SUCCESS;
 }
+
+
 
 
