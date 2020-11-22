@@ -8,23 +8,40 @@ void getTag(int i, char **str, FILE *dtd, int value);
 char* getPath(int val){
     int size = 500;
     int *pSize = &size;
-    char *str[*pSize];
-    if(val == 1){
-        printf("Enter the path to the xml\n");
-    } else if(val == 0){
-        printf("Enter the path to the dtd\n");
-    }
 
-    scanf("%s", &str);
+    if(val == 1){
+
+    } else if(val == 0){
+
+    }
+}
+
+void getFile(char *file) {
+    printf("Enter the path to the xml\n");
+    scanf("%s", file);
     printf("\n");
 
-    for(int i = 0; i < *pSize; i++){
-        if(str[i] == "\n"){
-            str[i] = "\0";
+    for(int i = 0; i < 500; i++){
+        if(file[i] == "\n"){
+            file[i] = "\0";
         }
     }
-    return str;
 }
+
+
+void getDtd(char *dtd) {
+    printf("Enter the path to the dtd\n");
+
+    scanf("%s", dtd);
+    printf("\n");
+
+    for(int i = 0; i < 500; i++){
+        if(dtd[i] == "\n"){
+            dtd[i] = "\0";
+        }
+    }
+}
+
 
 // Function to open the files & read them
 void openFile(char* filePath, char* dtdPath){
@@ -52,10 +69,10 @@ void openFile(char* filePath, char* dtdPath){
 
 
 // Function to check dtd format & get the different element in it
-int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
-    FILE* dtd = fopen(dtdPath, "r");
+int checkDtd(char* dtd, char **dtdResult, int* elementIndex){
+    FILE* dtdPath = fopen(dtd, "r");
 
-    if(dtd == NULL){
+    if(dtdPath == NULL){
         printf("Couldn't open DTD file.");
         return 0;
     }
@@ -64,7 +81,7 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
     char c;
     int j = 0;
 
-    getElement(0, dtdResult, dtd, elementIndex, j);
+    getElement(0, dtdResult, dtdPath, elementIndex, j);
 
     cmp = strcmp("<!DOCTYPE", &dtdResult[0][0]);
 
@@ -73,10 +90,8 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
         return 0;
     }
 
-    getElement(1, dtdResult, dtd, elementIndex, j);
+    getElement(1, dtdResult, dtdPath, elementIndex, j);
     //printf("%s",dtdResult);
-
-
 
     // Get the element after the doctype
     i = 2;
@@ -88,11 +103,11 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
 
             //if we get a "(" we will get the information in it
             if(c == 40 && i != 2) {
-                getTag(i, dtdResult, dtd, 41);
+                getTag(i, dtdResult, dtdPath, 41);
                 c = 41;
                 i += 1;
             }
-            c = fgetc(dtd);
+            c = fgetc(dtdPath);
 
             //count help to find the end of a tag
             if(c == 62) {
@@ -106,11 +121,10 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
 
         // We check if the tag start with an "!ELEMENT" & if the tag is closed before opening another one
         if(count == 1 || i == 2) {
-            value = checkElement(dtd);
+            value = checkElement(dtdPath);
         } else {
             value = 0;
         }
-
         if (value != 1 && value != 2) {
             printf("Your dtd is in a wrong format.\n");
             return 0;
@@ -118,22 +132,89 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex){
             // the case where we got to the end of file
             return 1;
         }
-
-
         // we store our element's name in our array
-        getElement(i, dtdResult, dtd, elementIndex, j);
+        getElement(i, dtdResult, dtdPath, elementIndex, j);
         j += 1;
-
         if(c != 93 && c != 40) {
-            c = fgetc(dtd);
+            c = fgetc(dtdPath);
         }
-
         i += 1;
+    }
+    return 1;
+}
 
+int checkXml(char* file){
+    FILE* xml = fopen(file, "r");
 
-
+    if(xml == NULL){
+        printf("Couldn't open XML file.");
+        return 0;
     }
 
+    char* version = "<?xml version=\"1.0\"";
+    char* version2 = "<?xml version=\"1.1\"";
+    char* chaine[20];
+    //char* chaine2;
+    int nbopen, nbclose, nboc, pos, again =1, again2 = 0;
+    char letter;
+    char letter2;
+    FILE* fichier = NULL;
+    fichier = fopen("donnee_xml.txt", "w+");
+    rewind(xml);
+    fgets(chaine, 20, xml);
+    if (strcmp(chaine, version) == 0 || strcmp(chaine, version2)==0){
+    }else{
+        printf("La version n'est pas bonne");
+        return 0;
+    }
+    nbopen = 1;
+    nbclose = 0;
+    nboc = 0;
+    while (!feof(xml)){
+        letter = fgetc(xml);
+        letter2= letter;
+        if (letter == '<'){
+            nbopen +=1;
+            pos = ftell(xml);
+            if(fgetc(xml)=='/'){
+                nboc +=1;
+            }else{
+                fseek(xml, -1, SEEK_CUR);
+                while (again == 1){
+                    letter2 = fgetc(xml);
+                    if (letter2 == 32 || letter2 == 62 || letter2 == 9 || letter2 == 33){
+                        again =0;
+                    }else{
+                        //printf("%c", letter2);
+                        fputc(letter2, fichier);
+                        fseek(fichier, 0, SEEK_CUR);
+                        again2 = 1;
+                    }
+                }
+                //printf("\n");
+                if(again2 == 1){
+                    fputc('\n', fichier);
+                }
+                fseek(xml, pos, SEEK_SET);
+                again = 1;
+                again2 = 0;
+            }
+        }
+        if (letter == '>'){
+            nbclose +=1;
+        }
+        if(letter == '/'){
+            if(fgetc(xml) == '>'){
+                nboc +=1;
+                fseek(xml, -1, SEEK_CUR);
+            }
+        }
+    }
+    if (nbopen != nbclose){
+        return 0;
+    }
+
+    fclose(fichier);
     return 1;
 }
 
@@ -182,7 +263,7 @@ void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j){
     while(c != 32 ){
         strncat(&dtdResult[i][0], &c, 1);
         c = fgetc(dtd);
-       // printf("%c",c);
+        // printf("%c",c);
     }
 }
 
@@ -194,7 +275,7 @@ void getTag(int i, char **dtdResult, FILE *dtd, int value) {
     //strncat(&dtdResult[i][0], &c, 1);
 
     c = fgetc(dtd);
-    printf("%c",c);
+    //printf("%c",c);
 
 // We stock what's in "()"
     while(c != value ){
@@ -236,122 +317,102 @@ int checkDoublons(char **dtdResult, int *elementIndex, int size) {
                         cmp = strcmp(dtdResult[i], dtdResult[j]);
 
                         if(cmp == 0) {
-                            return 0;
+                            return 0; // return 0 = pas de doublon
                         }
                     }
                 }
             }
         }
     }
-    return 1;
+    return 1; // return 1 = présence de doublon
 }
 
-char* getBalise(int index, char **dtd_table){
-    int size = 20;
-
-    char *balise = (char*)malloc(sizeof(char)*size);
-    for(int i = 0; i<20; i++){
-        if(i == index){
-            for(int j = 0; j<20; j++){
-                balise[j] = dtd_table[i][j];
-                //printf("%c", balise[j]);
+int fileSize(char* file){
+    FILE *Fichier = fopen(file, "r");
+    int sizeXml=0;
+        if(Fichier != NULL){
+            while(!feof(Fichier)){
+                if (fgetc(Fichier) == "\0"){
+                    sizeXml++;
+                }
             }
         }
-    }
-    return balise;
+    //printf("%d",sizeXml);
+    fclose(Fichier);
+    return sizeXml;
 }
 
-void createDataTable(char dtd_table[20][20]) {
+void stockFile(char *file, char** xml_result ){
+    FILE *Fichier = fopen(file,"r");
 
-    FILE* dtd_file = fopen("/Users/kevincheng/Desktop/dtd_file.txt", "r");
-
-    int i=0 , j=0;
-
-    int mychar;
-
-    //dtd_file = fopen("..\dtd_file.txt", "r");
-    if( dtd_file != NULL){//Si fichier non vide
-        do{
-            mychar = fgetc(dtd_file);
-            dtd_table[i][j] = mychar;//Save char in tab
-            j++;
-            if(mychar == 10){
-                i++;//On saute une ligne
-                j=0;//retour à la ligne pour le tableau
+    if( Fichier != NULL ){
+        int i=0;
+        char c = fgetc(Fichier);
+        while(c != EOF){
+            while( c != 10 && c != EOF){
+                //printf("%s", &xml_result[i][0]);
+                //printf("%s", &c);
+                strncat(&xml_result[i][0], &c,1);
+                c = fgetc(Fichier);
             }
-            //printf("%c", mychar);
-        } while (mychar != EOF);
-        printf("\n");
-
-        fclose(dtd_file);
+            c = fgetc(Fichier);
+            // printf("%s\n",&xml_result[i][0]);
+            i++;
+        }
+        strncat(&xml_result[i][0],"-1",2);
+        fclose(Fichier);
+    } else {
+        printf("Error");
+        fclose(Fichier);
     }
 }
 
-int getSize (char* table ){
-    int size = 0;
-    int i = 0;
-    while (table[i] != '\0'){
-        size++;
-        i++;
+/*int txtToTab( char *string, int *stockFile, int taille_s ){
+    if ( string != NULL && stockFile != NULL ){
+        char temp[2]="";
+        int i;
+        for ( i=0 ; i<taille_s ; i++ ){
+            sprintf(temp, "%c", string[i]);
+            stockFile[i] = atoi(temp);
+        }
     }
-    return size-1 ;
-}
+    else perror("\n\n txtToTab ");
+    return 0;
+}*/
 
-int compare(char dtd_table[20][20], char **dtd_result, int sizeDtdResult){
+int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex){
+    char end[3] = "-1";
+    int cmp = strcmp(&xml_result[0][0], &dtdResult[2][0]);
+    int count,i,j,k,found;
 
-    for(int mot = 0; mot <20; mot++) {
-        printf("%s", dtd_table[mot]);
-        for (int i = 1; i < sizeDtdResult; i++) {
-            char *balise = getBalise(i, dtd_result);
-            int sizeBalise = getSize(balise);
-            int sizemot = getSize(dtd_table[mot]);
-
-            if (sizeBalise != sizemot) {
-                printf("KO %d",i);
-                printf("%s\n",balise);
-                printf("%s \n",dtd_table[mot]);
-                printf("%d ||  %d", sizemot , sizeBalise);
-                return 0;
+    if (cmp == 0){
+        for (i = 1; i < 20 ; i++) {
+            found = 0;
+            if(strstr(&xml_result[i][0], end) == NULL){
+                for (j = 3; j < longueurDtd ; j++) {
+                    count = 0;
+                    for (k = 0; k < longueurDtd ; ++k) {
+                        if(elementIndex[k] == j){
+                            count += 1;
+                        }
+                    }
+                    if (count>0){
+                        cmp = strcmp(&xml_result[i][0], &dtdResult[j][0]);
+                        if(cmp == 0){
+                            found += 1;
+                        }
+                    }
+                }
+                if (found == 0){
+                    printf("test");
+                    return 0;
+                }
             } else {
-                for (int p = 0; p < sizemot; p++) {
-                    if (p > 0) {
-                        if (balise[p] != dtd_table[mot][p]) {
-                            return 0;
-                        }
-                    }
-                }
+                return 1;
             }
         }
-    }
         return 1;
-}
-
-void clearTable(char dtd_table[20][20]){
-    for(int i = 0; i<20; i++){
-        for(int j = 0; j<20; j++){
-            dtd_table[i][j] = '\0';
-        }
+    } else {
+        return 0;
     }
 }
-
-/*
-char** dtd_result = NULL;
-FILE *file = fopen("..\dtd_file.txt", "r");
-char dtd_table[20][20];
-
-//Iniatialisation des cases à 0;
-clearTable(dtd_table);
-
-int result = compare(file,dtd_result, dtd_table);
-
-for(int i = 0; i<20; i++){
-    for(int j = 0; j<20; j++){
-        printf("%c",dtd_table[i][j]);
-    }
-    printf("\n");
-} */
-
-// //Affichage des données
-//       for(int jk=0;jk<i;jk++){
-//           printf("%s",&dtdResult[jk][0]);
-//       }
