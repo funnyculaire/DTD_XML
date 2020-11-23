@@ -63,8 +63,8 @@ int main(int argc, const char * argv[]) {
 
         doubleElement = checkDoublons(dtdResult, elementIndex, size);
         attError = checkAttribute(dtdAttribute, attributeSize, dtdResult, elementIndex, size);
-printf("file: %s\n", file);
-        printf("dtd: %s\n", dtd);
+//printf("file: %s\n", file);
+        //printf("dtd: %s\n", dtd);
 
         if(doubleElement == 0 || tabError == 1 || attError == 1) {
             printf("Il y a une erreur dans votre dtd\n");
