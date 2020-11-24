@@ -340,17 +340,31 @@ int fileSize(char* file){
     return sizeXml;
 }
 
-void stockFile(char *file, char** xml_result ){
+void stockFile(char *file, char** xml_result/*, char** xml_attribute */ ){
     FILE *Fichier = fopen(file,"r");
 
     if( Fichier != NULL ){
         int i=0;
         char c = fgetc(Fichier);
-
+        // int count
         while(c != EOF){
+            // count = 0;
             while( c != 10 && c != EOF){
+                /*
+             * if(c == 124) {
+             *  count += 1;
+             * }
+             */
+                //if(count != 0) {
                 strncat(&xml_result[i][0], &c,1);
                 c = fgetc(Fichier);
+                //
+
+                /*
+             * strncat(&xml_attribute[i][0], &c,1);
+                c = fgetc(Fichier);
+             *
+             * */
             }
 
             c = fgetc(Fichier);

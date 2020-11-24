@@ -80,12 +80,13 @@ int main(int argc, const char * argv[]) {
             printf("%d\n", xmlError);
         } else {
             char** xml_result = (char**) malloc(size*sizeof(char*));
-
+            //char**  xml_attribute = (char**) malloc(size*sizeof(char*));
             for (int i = 0; i < size ; i++) {
                 xml_result[i] = (char*) malloc( sizeof(char) *size);
+                // xml_attribute[i] = (char*) malloc( sizeof(char) *size);
             }
 
-            stockFile(donneePath,xml_result);
+            stockFile(donneePath,xml_result/*, xml_attribute*/);
 
             int result = compare(xml_result,dtdResult,size,elementIndex);
 
