@@ -88,7 +88,7 @@ int main(int argc, const char * argv[]) {
 
             stockFile(donneePath,xml_result/*, xml_attribute*/);
 
-            int result = compare(xml_result,dtdResult,size,elementIndex);
+            int result = compare(xml_result,dtdResult,size,elementIndex/*, xml_attribute, dtdAttribute*/);
 
             if (result == 1) {
                 printf("Ce Xml est valide.\n");

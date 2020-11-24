@@ -439,7 +439,7 @@ int checkAttribute(char **dtdAttribute, int* attributeSize, char **dtdResult, in
 }
 
 
-int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex){
+int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex/*, char ** xml_attribute, char ** dtdAttribute*/){
     char end[3] = "-1";
     int cmp = strcmp(&xml_result[0][0], &dtdResult[2][0]);
     int count, i, j, k, found;
