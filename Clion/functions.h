@@ -30,32 +30,6 @@ void getDtd(char *dtd) {
     }
 }
 
-
-// Function to open the files & read them
-void openFile(char* filePath, char* dtdPath){
-    FILE* f = fopen(filePath, "r");
-    FILE* dtd = fopen(dtdPath, "r");
-
-    if(f != NULL){
-        char *str[1000];
-        fread(str, 1, 1000, f);
-        printf("%s",str);
-    } else {
-        printf("Couldn't open xml file.");
-    }
-    printf("\n");
-
-    if(dtd != NULL){
-        char *str2[1000];
-        fread(str2, 1, 1000, dtd);
-        printf("%s",str2);
-    } else {
-        printf("Couldn't open DTD file.");
-    }
-    printf("\n");
-}
-
-
 // Function to check dtd format & get the different element in it
 int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttribute, int* attributeSize){
     FILE* dtd = fopen(dtdPath, "r");
@@ -143,6 +117,95 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttri
         i += 1;
     }
 
+    return 1;
+}
+
+
+int checkXml(char* file){
+    FILE* xml = fopen(file, "r");
+
+    if(xml == NULL){
+        printf("Couldn't open XML file.");
+        return 0;
+    }
+
+    char* version = "<?xml version=\"1.0\"";
+    char* version2 = "<?xml version=\"1.1\"";
+    char* chaine[20];
+    //char* chaine2;
+    int nbopen, nbclose, nboc, pos, again =1, again2 = 0;
+    char letter;
+    char letter2;
+    FILE* fichier = NULL;
+
+    fichier = fopen("donnee_xml.txt", "w+");
+    rewind(xml);
+    fgets(chaine, 20, xml);
+
+    if (strcmp(chaine, version) == 0 || strcmp(chaine, version2)==0){
+    }else{
+        printf("La version n'est pas bonne");
+        return 0;
+    }
+
+    nbopen = 1;
+    nbclose = 0;
+    nboc = 0;
+
+    while (!feof(xml)){
+        letter = fgetc(xml);
+        letter2= letter;
+
+        if (letter == '<'){
+            nbopen +=1;
+            pos = ftell(xml);
+
+            if(fgetc(xml)=='/'){
+                nboc +=1;
+            }else{
+                fseek(xml, -1, SEEK_CUR);
+
+                while (again == 1){
+                    letter2 = fgetc(xml);
+
+                    if (letter2 == 32 || letter2 == 62 || letter2 == 9 || letter2 == 33){
+                        again =0;
+                    }else{
+                        //printf("%c", letter2);
+                        fputc(letter2, fichier);
+                        fseek(fichier, 0, SEEK_CUR);
+                        again2 = 1;
+                    }
+                }
+
+                //printf("\n");
+                if(again2 == 1){
+                    fputc('\n', fichier);
+                }
+
+                fseek(xml, pos, SEEK_SET);
+                again = 1;
+                again2 = 0;
+            }
+        }
+
+        if (letter == '>'){
+            nbclose +=1;
+        }
+
+        if(letter == '/'){
+            if(fgetc(xml) == '>'){
+                nboc +=1;
+                fseek(xml, -1, SEEK_CUR);
+            }
+        }
+    }
+
+    if (nbopen != nbclose){
+        return 0;
+    }
+
+    fclose(fichier);
     return 1;
 }
 
@@ -260,6 +323,48 @@ int checkDoublons(char **dtdResult, int *elementIndex, int size) {
     return 1;
 }
 
+
+int fileSize(char* file){
+    FILE *Fichier = fopen(file, "r");
+    int sizeXml=0;
+
+    if(Fichier != NULL){
+        while(!feof(Fichier)){
+            if (fgetc(Fichier) == "\0"){
+                sizeXml++;
+            }
+        }
+    }
+
+    fclose(Fichier);
+    return sizeXml;
+}
+
+void stockFile(char *file, char** xml_result ){
+    FILE *Fichier = fopen(file,"r");
+
+    if( Fichier != NULL ){
+        int i=0;
+        char c = fgetc(Fichier);
+
+        while(c != EOF){
+            while( c != 10 && c != EOF){
+                strncat(&xml_result[i][0], &c,1);
+                c = fgetc(Fichier);
+            }
+
+            c = fgetc(Fichier);
+            i++;
+        }
+
+        strncat(&xml_result[i][0],"-1",2);
+        fclose(Fichier);
+    } else {
+        printf("Error");
+        fclose(Fichier);
+    }
+}
+
 void getAttribute(FILE *dtd, char **dtdAttribute, int k) {
     char c;
 
@@ -316,4 +421,52 @@ int checkAttribute(char **dtdAttribute, int* attributeSize, char **dtdResult, in
     }
 
     return 0;
+}
+
+
+int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex){
+    char end[3] = "-1";
+    int cmp = strcmp(&xml_result[0][0], &dtdResult[2][0]);
+    int count, i, j, k, found;
+
+    if (cmp == 0){
+
+        for (i = 1; i < 20 ; i++) {
+            found = 0;
+
+            if(strstr(&xml_result[i][0], end) == NULL){
+
+                for (j = 3; j < longueurDtd ; j++) {
+                    count = 0;
+
+                    for (k = 0; k < longueurDtd ; ++k) {
+
+                        if(elementIndex[k] == j){
+                            count += 1;
+                        }
+                    }
+
+                    if (count>0){
+                        cmp = strcmp(&xml_result[i][0], &dtdResult[j][0]);
+
+                        if(cmp == 0){
+                            found += 1;
+                        }
+                    }
+                }
+
+                if (found == 0){
+                    return 0;
+                }
+
+            } else {
+                return 1;
+            }
+        }
+
+        return 1;
+
+    } else {
+        return 0;
+    }
 }

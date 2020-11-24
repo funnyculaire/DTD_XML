@@ -10,28 +10,29 @@
 #include <string.h>
 #include "functions.h"
 
-void openFile(char* filePath, char* dtdPath);
-char* getPath(int val);
 int checkDtd(char* dtdPath, char** dtdResult, int* elementIndex, char** dtdAttribute, int *attributeSize);
 void getElement(int i, char** dtdResult, FILE* dtd, int* elementIndex, int j);
 int checkElement(FILE* dtd);
 void getTag(int i, char **dtdResult, FILE *dtd, int value);
 int checkDoublons(char **dtdResult, int* elementIndex, size);
+int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex);
 void getAttribute(FILE *dtd, char **dtdAttribute, int k);
 int checkAttribute(char **dtdAttribute, int *attributeSize, char **dtdResult, int* elementIndex, int* size);
 void getFile(char *file);
 void getDtd(char *dtd);
 
 int main(int argc, const char * argv[]) {
-    int value, i, result, doubleElement, attError;
+    int value, i, doubleElement, attError;
     char ** dtdResult;
     char ** dtdAttribute;
     int size = 50;
     int *elementIndex;
     int *attributeSize;
-    int tabError = 1;
+    int dtdError;
+    int xmlError;
     char * file;
     char * dtd;
+    char* donneePath = "donnee_xml.txt";
 
     printf("Do you want to start? enter 1 for yes.\n");
     scanf("%d", &value);
@@ -56,9 +57,15 @@ int main(int argc, const char * argv[]) {
         //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtd4.dtd"
 
         if(checkDtd(dtd, dtdResult, elementIndex, dtdAttribute, attributeSize) == 0) {
-            tabError = 1;
+            dtdError = 1;
         } else {
-            tabError = 0;
+            dtdError = 0;
+        }
+
+        if(checkXml(file) == 0) {
+            xmlError = 1;
+        } else {
+            xmlError = 0;
         }
 
         doubleElement = checkDoublons(dtdResult, elementIndex, size);
@@ -66,10 +73,27 @@ int main(int argc, const char * argv[]) {
 //printf("file: %s\n", file);
         //printf("dtd: %s\n", dtd);
 
-        if(doubleElement == 0 || tabError == 1 || attError == 1) {
-            printf("Il y a une erreur dans votre dtd\n");
+        if(doubleElement == 0 || dtdError == 1 || xmlError == 1 || attError == 1) {
+            printf("Il y a une erreur dans votre dtd ou xml\n");
+            printf("%d\n", doubleElement);
+            printf("%d\n", dtdError);
+            printf("%d\n", xmlError);
         } else {
-            printf("Continuité du code\n");
+            char** xml_result = (char**) malloc(size*sizeof(char*));
+
+            for (int i = 0; i < size ; i++) {
+                xml_result[i] = (char*) malloc( sizeof(char) *size);
+            }
+
+            stockFile(donneePath,xml_result);
+
+            int result = compare(xml_result,dtdResult,size,elementIndex);
+
+            if (result == 1) {
+                printf("Ce Xml est valide.\n");
+            } else {
+                printf("Ce Xml n'est pas valide.\n");
+            }
         }
 
         for(i = 0; i < size ; i++){
