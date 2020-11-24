@@ -372,6 +372,7 @@ void stockFile(char *file, char** xml_result/*, char** xml_attribute */ ){
         }
 
         strncat(&xml_result[i][0],"-1",2);
+        //strncat(&xml_attribute[i][0],"-1",2);
         fclose(Fichier);
     } else {
         printf("Error");
