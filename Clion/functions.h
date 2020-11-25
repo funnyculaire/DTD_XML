@@ -121,78 +121,102 @@ int checkDtd(char* dtdPath, char **dtdResult, int* elementIndex, char** dtdAttri
 }
 
 
-int checkXml(char* file){
-    FILE* xml = fopen(file, "r");
-
+int checkXml(char* XMLPath){
+    FILE* xml = fopen(XMLPath, "r");
     if(xml == NULL){
-        printf("Couldn't open XML file.");
+        printf("Couldn't open XML files.");
         return 0;
     }
-
     char* version = "<?xml version=\"1.0\"";
     char* version2 = "<?xml version=\"1.1\"";
     char* chaine[20];
-    //char* chaine2;
-    int nbopen, nbclose, nboc, pos, again =1, again2 = 0;
+    char* chaine2[8];
+    int nbopen, nbclose, nboc, pos, again =1, again2 = 0, kg = 1, instr = 1, cmp, a=0, nbcardtd =1;
     char letter;
     char letter2;
+    char letter3;
     FILE* fichier = NULL;
-
     fichier = fopen("donnee_xml.txt", "w+");
     rewind(xml);
     fgets(chaine, 20, xml);
-
     if (strcmp(chaine, version) == 0 || strcmp(chaine, version2)==0){
     }else{
         printf("La version n'est pas bonne");
         return 0;
     }
-
+    fgetc(xml);
     nbopen = 1;
-    nbclose = 0;
+    nbclose = 1;
     nboc = 0;
-
+    while(fgetc(xml) != 62){
+    }
+    fgetc(xml);
+    fgets(chaine2, 10, xml);
+    cmp = strcmp(chaine2, "<!DOCTYPE");
+    fgetc(xml);
+    if(cmp == 0){
+        while(fgetc(xml) != 32){
+            fseek(xml, -1, SEEK_CUR);
+            fputc(fgetc(xml), fichier);
+        }
+        fputc(10, fichier);
+        while(fgetc(xml) != 62){}
+    }else{
+        fseek(xml, -10, SEEK_CUR);
+    }
     while (!feof(xml)){
         letter = fgetc(xml);
-        letter2= letter;
-
+        letter2=letter;
         if (letter == '<'){
             nbopen +=1;
             pos = ftell(xml);
-
             if(fgetc(xml)=='/'){
                 nboc +=1;
             }else{
                 fseek(xml, -1, SEEK_CUR);
-
-                while (again == 1){
+                while (again == 1 && letter2 != 47 && letter2 != 62){
                     letter2 = fgetc(xml);
-
-                    if (letter2 == 32 || letter2 == 62 || letter2 == 9 || letter2 == 33){
-                        again =0;
-                    }else{
-                        //printf("%c", letter2);
-                        fputc(letter2, fichier);
-                        fseek(fichier, 0, SEEK_CUR);
-                        again2 = 1;
+                    if (letter2 == 34 && instr == 1){
+                        instr = 0;
+                    }else if (letter2 == 34 && instr == 0){
+                        instr = 1;
+                    }
+                    if(instr == 1){
+                        if(letter2 == 61 || letter2 == 47 || letter2 == 62 || letter2 == 34 || letter2 == 33 ){
+                            kg = 0;
+                        }
+                        letter3 = fgetc(xml);
+                        fseek(xml, -1, SEEK_CUR);
+                        if(letter2 == 32 || (letter2 == 9 && (letter3 != 9 && letter3 != 32))){
+                            fputs("||", fichier);
+                            kg = 1;
+                        }
+                        if(letter2 == 60){
+                            kg = 1;
+                        }
+                        if(kg == 1){
+                            if(letter2 != 9 && letter2 !=32){
+                                fputc(letter2, fichier);
+                            }
+                            fseek(fichier, 0, SEEK_CUR);
+                            again2 = 1;
+                        }
+                        // printf("\n%d", kg);
                     }
                 }
-
-                //printf("\n");
                 if(again2 == 1){
                     fputc('\n', fichier);
                 }
-
                 fseek(xml, pos, SEEK_SET);
                 again = 1;
                 again2 = 0;
+                kg = 1;
             }
         }
-
+        //}
         if (letter == '>'){
             nbclose +=1;
         }
-
         if(letter == '/'){
             if(fgetc(xml) == '>'){
                 nboc +=1;
@@ -200,11 +224,9 @@ int checkXml(char* file){
             }
         }
     }
-
     if (nbopen != nbclose){
         return 0;
     }
-
     fclose(fichier);
     return 1;
 }

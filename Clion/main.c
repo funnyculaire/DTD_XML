@@ -53,9 +53,6 @@ int main(int argc, const char * argv[]) {
         getFile(file);
         getDtd(dtd);
 
-        //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtd3.dtd"
-        //"/Users/bk/Desktop/C/Projet/DTD_XML/files/dtd4.dtd"
-
         if(checkDtd(dtd, dtdResult, elementIndex, dtdAttribute, attributeSize) == 0) {
             dtdError = 1;
         } else {
@@ -70,17 +67,13 @@ int main(int argc, const char * argv[]) {
 
         doubleElement = checkDoublons(dtdResult, elementIndex, size);
         attError = checkAttribute(dtdAttribute, attributeSize, dtdResult, elementIndex, size);
-//printf("file: %s\n", file);
-        //printf("dtd: %s\n", dtd);
 
         if(doubleElement == 0 || dtdError == 1 || xmlError == 1 || attError == 1) {
             printf("Il y a une erreur dans votre dtd ou xml\n");
-            printf("%d\n", doubleElement);
-            printf("%d\n", dtdError);
-            printf("%d\n", xmlError);
         } else {
             char** xml_result = (char**) malloc(size*sizeof(char*));
             //char**  xml_attribute = (char**) malloc(size*sizeof(char*));
+
             for (int i = 0; i < size ; i++) {
                 xml_result[i] = (char*) malloc( sizeof(char) *size);
                 // xml_attribute[i] = (char*) malloc( sizeof(char) *size);
