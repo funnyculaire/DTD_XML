@@ -142,7 +142,7 @@ int checkXml(char* file){
     char* version = "<?xml version=\"1.0\"";
     char* version2 = "<?xml version=\"1.1\"";
     char* chaine[20];
-    //char* chaine2;
+    char* chaine2[8];
     int nbopen, nbclose, nboc, pos, again =1, again2 = 0;
     char letter;
     char letter2;
@@ -161,6 +161,21 @@ int checkXml(char* file){
     nbopen = 1;
     nbclose = 0;
     nboc = 0;
+
+    while(fgetc(xml) != 62){
+    }
+    fgetc(xml);
+    fgets(chaine2, 10, xml);
+    int cmp = strcmp(chaine2, "<!DOCTYPE");
+    fgetc(xml);
+    if(cmp == 0){
+        while(fgetc(xml) != 32){
+            fseek(xml, -1, SEEK_CUR);
+            fputc(fgetc(xml), fichier);
+        }
+        fputc(10, fichier);
+        while(fgetc(xml) != 62){}
+    }
 
     while (!feof(xml)){
         letter = fgetc(xml);
@@ -350,7 +365,7 @@ void stockFile(char *file, char** xml_result ){
                 strncat(&xml_result[i][0], &c,1);
                 c = fgetc(Fichier);
             }
-
+            printf("%s", &xml_result[i][0]);
             c = fgetc(Fichier);
             i++;
         }
@@ -365,7 +380,8 @@ void stockFile(char *file, char** xml_result ){
 
 int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex){
     char end[3] = "-1";
-    int cmp = strcmp(&xml_result[0][0], &dtdResult[2][0]);
+    int doctype = strcmp(&xml_result[0][0], &dtdResult[1][0]);
+    int cmp = strcmp(&xml_result[1][0], &dtdResult[2][0]);
     int count, i, j, k, found;
 
     if (cmp == 0){
