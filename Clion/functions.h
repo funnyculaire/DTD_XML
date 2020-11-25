@@ -175,6 +175,8 @@ int checkXml(char* file){
         }
         fputc(10, fichier);
         while(fgetc(xml) != 62){}
+    } else{
+        fseek(xml, -10, SEEK_CUR);
     }
 
     while (!feof(xml)){
