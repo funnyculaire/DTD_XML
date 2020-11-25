@@ -59,11 +59,10 @@ int main(int argc, const char * argv[]) {
 
         doubleElement = checkDoublons(dtdResult, elementIndex, size);
 
-        if(doubleElement == 0 || Dtderror == 1 ||  Xmlerror == 1) {
-            printf("Il y a une erreur dans votre dtd ou xml. \n");
-            printf("%d\n", doubleElement);
-            printf("%d\n", Dtderror);
-            printf("%d\n", Xmlerror);
+        if(doubleElement == 0 || Dtderror == 1) {
+            printf("Il y a une erreur dans votre DTD\n");
+        } else if(Xmlerror == 1){
+            printf("Il y a une erreur dans votre XML\n");
         } else {
             char** xml_result = (char**) malloc(size*sizeof(char*));
 
@@ -76,9 +75,9 @@ int main(int argc, const char * argv[]) {
             int result = compare(xml_result,dtdResult,size,elementIndex);
 
             if (result == 1) {
-                printf("Ce Xml et ce Dtd sont compatibles.\n");
+                printf("Ce Xml est valide.\n");
             } else {
-                printf("Ce Xml et ce Dtd ne sont pas compatibles.\n");
+                printf("Ce Xml n'est pas valide.\n");
             }
         }
 

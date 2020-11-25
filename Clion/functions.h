@@ -159,7 +159,7 @@ int checkXml(char* file){
     }
 
     nbopen = 1;
-    nbclose = 0;
+    nbclose = 1;
     nboc = 0;
 
     while(fgetc(xml) != 62){
@@ -198,14 +198,12 @@ int checkXml(char* file){
                     if (letter2 == 32 || letter2 == 62 || letter2 == 9 || letter2 == 33){
                         again =0;
                     }else{
-                        //printf("%c", letter2);
                         fputc(letter2, fichier);
                         fseek(fichier, 0, SEEK_CUR);
                         again2 = 1;
                     }
                 }
 
-                //printf("\n");
                 if(again2 == 1){
                     fputc('\n', fichier);
                 }
@@ -367,7 +365,7 @@ void stockFile(char *file, char** xml_result ){
                 strncat(&xml_result[i][0], &c,1);
                 c = fgetc(Fichier);
             }
-            printf("%s", &xml_result[i][0]);
+            printf("%s\n", &xml_result[i][0]);
             c = fgetc(Fichier);
             i++;
         }
@@ -386,9 +384,9 @@ int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIn
     int cmp = strcmp(&xml_result[1][0], &dtdResult[2][0]);
     int count, i, j, k, found;
 
-    if (cmp == 0){
+    if (cmp == 0 && doctype == 0){
 
-        for (i = 1; i < 20 ; i++) {
+        for (i = 2; i < 20 ; i++) {
             found = 0;
 
             if(strstr(&xml_result[i][0], end) == NULL){

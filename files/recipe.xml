@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE recipe SYSTEM "recipe.dtd"[]>
+<recipe>
+    <cake quantity="5">Tarte aux pommes</cake>
+    <cake quantity="4">Fraisier</cake>
+    <cake quantity="2">Tiramisu</cake>
+</recipe>
