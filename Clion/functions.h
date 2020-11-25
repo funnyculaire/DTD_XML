@@ -463,12 +463,13 @@ int checkAttribute(char **dtdAttribute, int* attributeSize, char **dtdResult, in
 
 int compare(char **xml_result, char **dtdResult, int longueurDtd, int* elementIndex/*, char ** xml_attribute, char ** dtdAttribute*/){
     char end[3] = "-1";
-    int cmp = strcmp(&xml_result[0][0], &dtdResult[2][0]);
+    int doctype = strcmp(&xml_result[0][0], &dtdResult[1][0]);
+    int cmp = strcmp(&xml_result[1][0], &dtdResult[2][0]);
     int count, i, j, k, found;
 
-    if (cmp == 0){
+    if (cmp == 0 && doctype == 0){
 
-        for (i = 1; i < 20 ; i++) {
+        for (i = 2; i < 20 ; i++) {
             found = 0;
 
             if(strstr(&xml_result[i][0], end) == NULL){
